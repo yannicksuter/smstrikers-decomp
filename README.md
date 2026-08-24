@@ -2,22 +2,14 @@ Super Mario Strikers
 [![Build Status]][actions] [![Code Progress]][progress] [![Link Progress]][progress] [![Discord Badge]][discord]
 =============
 
-<!--
-Replace with your repository's URL.
--->
 [Build Status]: https://github.com/yannicksuter/smstrikers-decomp/actions/workflows/build.yml/badge.svg
 [actions]: https://github.com/yannicksuter/smstrikers-decomp/actions/workflows/build.yml
-<!--
-decomp.dev progress badges
-See https://decomp.dev/api for an API overview.
--->
+
 [Code Progress]: https://decomp.dev/yannicksuter/smstrikers-decomp.svg?mode=shield&measure=code&label=Code
 [Link Progress]: https://decomp.dev/yannicksuter/smstrikers-decomp.svg?mode=shield&measure=complete_code_percent&label=Linked
 [Fuzzy Progress]: https://decomp.dev/yannicksuter/smstrikers-decomp.svg?mode=shield&measure=fuzzy_match_percent&label=Fuzzy
 [progress]: https://decomp.dev/yannicksuter/smstrikers-decomp
-<!--
-Replace with your Discord server's ID and invite URL.
--->
+
 [Discord Badge]: https://img.shields.io/discord/727908905392275526?color=%237289DA&logo=discord&logoColor=%23FFFFFF
 [discord]: https://discord.gg/hKx3FJJgrV
 
