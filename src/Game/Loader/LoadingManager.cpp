@@ -30,7 +30,7 @@ void LoadingManager::Run(float dt)
 {
     u32 startTicker;
     u32 endTicker;
-    bool var_r29 = 0;
+    bool bEntryFinished = 0;
 
     if (m_NumEntries == 0)
         return;
@@ -38,7 +38,7 @@ void LoadingManager::Run(float dt)
     if (m_LoadFinished == 0)
     {
         startTicker = nlGetTicker();
-        var_r29 = m_LoaderQueue[m_CurrEntry]->Update();
+        bEntryFinished = m_LoaderQueue[m_CurrEntry]->Update();
         endTicker = nlGetTicker();
         float timeDiff = nlGetTickerDifference(startTicker, endTicker);
         if (timeDiff > 34.0f)
@@ -47,7 +47,7 @@ void LoadingManager::Run(float dt)
         }
     }
 
-    if ((m_LoadFinished != 0) || (var_r29 != 0))
+    if ((m_LoadFinished != 0) || (bEntryFinished != 0))
     {
         m_LoadFinished = 0;
         m_NumEntries -= 1;

@@ -1,3 +1,4 @@
+#include "Game/MathHelpers.h"
 #include "Game/WorldManager.h"
 #include "NL/platqmath.h"
 
@@ -462,25 +463,18 @@ void cBall::CollideWithCharacterCallback(cPlayer* pCharacter, const nlVector3& v
         {
             pOwnerFielder->ReleaseBall();
 
-            do
+            if (!((cFielder*)pCharacter)->IsFrozen() && (((cFielder*)pCharacter)->m_eActionState == ACTION_RUNNING || ((cFielder*)pCharacter)->m_eActionState == ACTION_SLIDE_ATTACK)
+                && (u16)abs_s16(pCharacterFielder->GetFacingDeltaToPosition(g_pBall->m_v3Position)) < 0x4000)
             {
-                if (!((cFielder*)pCharacter)->IsFrozen() && (((cFielder*)pCharacter)->m_eActionState == ACTION_RUNNING || ((cFielder*)pCharacter)->m_eActionState == ACTION_SLIDE_ATTACK))
-                {
-                    s16 delta = pCharacterFielder->GetFacingDeltaToPosition(g_pBall->m_v3Position);
-                    u16 absDelta = delta < 0 ? -delta : delta;
-
-                    if (absDelta < 0x4000)
-                    {
-                        pCharacterFielder->PickupBall(g_pBall);
-                        pCharacterFielder->InitActionRunningWB(false);
-                        break;
-                    }
-                }
-
+                pCharacterFielder->PickupBall(g_pBall);
+                pCharacterFielder->InitActionRunningWB(false);
+            }
+            else
+            {
                 pOwnerFielder->ShootBallDueToContact(pCharacterFielder->m_v3Velocity);
                 pOwnerFielder->SetNoPickUpTime(0.33f);
                 pCharacterFielder->SetNoPickUpTime(0.33f);
-            } while (0);
+            }
 
             pOwnerFielder->InitDesire(FIELDERDESIRE_FINISH_ACTION, 0.5f, -1.0f, fvNotSet, fvNotSet);
         }
@@ -916,10 +910,10 @@ void cBall::PostPhysicsUpdate(float fDeltaT)
  */
 nlVector3* cBall::GetAIVelocity() const
 {
-    cPlayer* temp_r4 = m_pOwner;
-    if (temp_r4 != NULL)
+    cPlayer* pOwner = m_pOwner;
+    if (pOwner != NULL)
     {
-        return &(temp_r4->m_v3Velocity);
+        return &(pOwner->m_v3Velocity);
     }
     return (nlVector3*)&(m_v3Velocity);
 }

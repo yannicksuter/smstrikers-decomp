@@ -58,17 +58,17 @@ RunningChecksum::RunningChecksum()
  */
 void RunningChecksum::ChecksumInt(unsigned long value)
 {
-    u8* sp8 = (u8*)&value;
+    u8* bytes = (u8*)&value;
     u32 temp;
 
     temp = m_nChecksum;
-    m_nChecksum = (temp >> 8U) ^ crcTable[sp8[0] ^ (u8)m_nChecksum];
+    m_nChecksum = (temp >> 8U) ^ crcTable[bytes[0] ^ (u8)m_nChecksum];
     temp = m_nChecksum;
-    m_nChecksum = (temp >> 8U) ^ crcTable[sp8[1] ^ (u8)temp];
+    m_nChecksum = (temp >> 8U) ^ crcTable[bytes[1] ^ (u8)temp];
     temp = m_nChecksum;
-    m_nChecksum = (temp >> 8U) ^ crcTable[sp8[2] ^ (u8)temp];
+    m_nChecksum = (temp >> 8U) ^ crcTable[bytes[2] ^ (u8)temp];
     temp = m_nChecksum;
-    m_nChecksum = (temp >> 8U) ^ crcTable[sp8[3] ^ (u8)temp];
+    m_nChecksum = (temp >> 8U) ^ crcTable[bytes[3] ^ (u8)temp];
 }
 
 /**

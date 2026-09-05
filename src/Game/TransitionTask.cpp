@@ -1152,6 +1152,25 @@ void TransitionTask::CompactSlotPools()
     glViewCompact();
 }
 
+static void PushFirstScreen(bool isBPressed)
+{
+    if (VIGetTvFormat() == 0)
+    {
+        if (VIGetDTVStatus() != 0 && (OSGetProgressiveMode() == 1 || isBPressed))
+        {
+            nlSingleton<GameSceneManager>::Instance()->Push(SCENE_PROGRESSIVE_SCAN, (ScreenMovement)0, false);
+            return;
+        }
+    }
+    else if (VIGetTvFormat() == 1)
+    {
+        nlSingleton<GameSceneManager>::Instance()->Push(SCENE_EURO_RGB60, (ScreenMovement)0, false);
+        return;
+    }
+
+    nlSingleton<GameSceneManager>::Instance()->Push(SCENE_HEALTH_WARNING, (ScreenMovement)0, false);
+}
+
 void TransitionTask::DisplayFirstScreen()
 {
     bool isBPressed = g_pFEInput->IsPressed(FE_ALL_PADS, 0x200, false, NULL);
@@ -1161,22 +1180,5 @@ void TransitionTask::DisplayFirstScreen()
         glx_SetPal50Mode();
     }
 
-    do
-    {
-        if (VIGetTvFormat() == 0)
-        {
-            if (VIGetDTVStatus() != 0 && (OSGetProgressiveMode() == 1 || isBPressed))
-            {
-                nlSingleton<GameSceneManager>::Instance()->Push(SCENE_PROGRESSIVE_SCAN, (ScreenMovement)0, false);
-                break;
-            }
-        }
-        else if (VIGetTvFormat() == 1)
-        {
-            nlSingleton<GameSceneManager>::Instance()->Push(SCENE_EURO_RGB60, (ScreenMovement)0, false);
-            break;
-        }
-
-        nlSingleton<GameSceneManager>::Instance()->Push(SCENE_HEALTH_WARNING, (ScreenMovement)0, false);
-    } while (false);
+    PushFirstScreen(isBPressed);
 }

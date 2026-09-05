@@ -202,18 +202,12 @@ void WinnerOverlay::Update(float fDeltaT)
             return;
         }
 
-        if (slide->m_time >= (slide->m_start + slide->m_duration))
-        {
-        }
-        else
+        if (!(slide->m_time >= (slide->m_start + slide->m_duration)))
         {
             return;
         }
 
-        if (mInputDelay <= 0.0)
-        {
-        }
-        else
+        if (!(mInputDelay <= 0.0))
         {
             return;
         }

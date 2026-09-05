@@ -1182,10 +1182,7 @@ void Goalie::ActionMoveWB(float fDeltaT)
             double absX;
             absX = __fabs(m_v3Position.x);
             float goalLineX = cField::GetGoalLineX(1U) - 3.0f;
-            if ((float)absX > goalLineX)
-            {
-            }
-            else
+            if (!((float)absX > goalLineX))
             {
                 u16 diff = (u16)abs_s16((s16)(m_aDesiredFacingDirection - m_aActualFacingDirection));
                 if (diff <= 0xDAC)

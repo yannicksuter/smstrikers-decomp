@@ -103,86 +103,86 @@ bool glQuad3::Attach(eGLView view, int stream, bool useDefaultProgram)
  */
 void glQuad3::SetupRotatedRectangle(float w, float h, const nlMatrix4& mtx, bool flipU, bool flipV)
 {
-    nlVector3 sp8;
+    nlVector3 corner;
 
-    float f3 = 0.5f;
-    float temp_f31;
-    float temp_f30;
-    float temp_f29;
-    float temp_f31_2;
+    float half = 0.5f;
+    float negHalfH;
+    float halfW;
+    float negHalfW;
+    float halfH;
 
-    temp_f29 = -w * f3;
-    temp_f31 = -h * f3;
-    nlVec3Set(sp8, temp_f29, temp_f31, 0.0f);
+    negHalfW = -w * half;
+    negHalfH = -h * half;
+    nlVec3Set(corner, negHalfW, negHalfH, 0.0f);
 
-    nlMultPosVectorMatrix(sp8, sp8, mtx);
-    m_pos[0] = sp8;
+    nlMultPosVectorMatrix(corner, corner, mtx);
+    m_pos[0] = corner;
 
-    temp_f30 = w * f3;
-    nlVec3Set(sp8, temp_f30, temp_f31, 0.0f);
+    halfW = w * half;
+    nlVec3Set(corner, halfW, negHalfH, 0.0f);
 
-    nlMultPosVectorMatrix(sp8, sp8, mtx);
-    m_pos[1] = sp8;
+    nlMultPosVectorMatrix(corner, corner, mtx);
+    m_pos[1] = corner;
 
-    temp_f31_2 = h * f3;
-    nlVec3Set(sp8, temp_f30, temp_f31_2, 0.0f);
+    halfH = h * half;
+    nlVec3Set(corner, halfW, halfH, 0.0f);
 
-    nlMultPosVectorMatrix(sp8, sp8, mtx);
-    m_pos[2] = sp8;
+    nlMultPosVectorMatrix(corner, corner, mtx);
+    m_pos[2] = corner;
 
-    nlVec3Set(sp8, temp_f29, temp_f31_2, 0.0f);
-    nlMultPosVectorMatrix(sp8, sp8, mtx);
-    m_pos[3] = sp8;
+    nlVec3Set(corner, negHalfW, halfH, 0.0f);
+    nlMultPosVectorMatrix(corner, corner, mtx);
+    m_pos[3] = corner;
 
-    f32 var_f0;
-    f32 var_f1;
-    f32 var_f2;
-    f32 var_f3;
-
-    if (flipU != 0)
-    {
-        var_f0 = 1.0f;
-    }
-    else
-    {
-        var_f0 = 0.0f;
-    }
+    f32 u0;
+    f32 u1;
+    f32 v0;
+    f32 v1;
 
     if (flipU != 0)
     {
-        var_f1 = 0.0f;
+        u0 = 1.0f;
     }
     else
     {
-        var_f1 = 1.0f;
+        u0 = 0.0f;
+    }
+
+    if (flipU != 0)
+    {
+        u1 = 0.0f;
+    }
+    else
+    {
+        u1 = 1.0f;
     }
 
     if (flipV != 0)
     {
-        var_f2 = 1.0f;
+        v0 = 1.0f;
     }
     else
     {
-        var_f2 = 0.0f;
+        v0 = 0.0f;
     }
 
     if (flipV != 0)
     {
-        var_f3 = 0.0f;
+        v1 = 0.0f;
     }
     else
     {
-        var_f3 = 1.0f;
+        v1 = 1.0f;
     }
 
-    m_uv[0].x = var_f0;
-    m_uv[0].y = var_f2;
-    m_uv[1].x = var_f1;
-    m_uv[1].y = var_f2;
-    m_uv[2].x = var_f1;
-    m_uv[2].y = var_f3;
-    m_uv[3].x = var_f0;
-    m_uv[3].y = var_f3;
+    m_uv[0].x = u0;
+    m_uv[0].y = v0;
+    m_uv[1].x = u1;
+    m_uv[1].y = v0;
+    m_uv[2].x = u1;
+    m_uv[2].y = v1;
+    m_uv[3].x = u0;
+    m_uv[3].y = v1;
 
     m_colour[0].c[0] = 0xFF;
     m_colour[0].c[1] = 0xFF;

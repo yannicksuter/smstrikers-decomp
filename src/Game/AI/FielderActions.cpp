@@ -3635,10 +3635,7 @@ void cFielder::ActionShootToScore(float fDeltaT)
         {
             if (m_pCurrentAnimController->TestTrigger(firstKickTime))
             {
-                if (sbMatrixCamUseWorldDarkening && meS2SResult == S2S_SUPER_SHOT)
-                {
-                }
-                else
+                if (!(sbMatrixCamUseWorldDarkening && meS2SResult == S2S_SUPER_SHOT))
                 {
                     float fFadeFromDarkSpeed = GetConfigFloat(Config::Global(), "captain_sts/fade_from_dark_speed", 100.0f);
                     WorldDarkening::Instance().Fade(fFadeFromDarkSpeed, 0.0f);

@@ -1564,12 +1564,9 @@ void GameInfoManager::IncreaseRoundNumber()
 
     s16 round = mCurrentCup->mRoundNumber;
 
-    do
+    // Written as a negated && chain: MWCC folds the equivalent || chain into a range test.
+    if (!(round != -3 && round != -2 && round != -1))
     {
-        if (round != -3)
-            if (round != -2)
-                if (round != -1)
-                    break;
         if (!SetupKnockoutRound(round))
         {
             if (mCurrentCup->mRoundNumber == -3)
@@ -1588,7 +1585,7 @@ void GameInfoManager::IncreaseRoundNumber()
 
             mCurrentCup->mRoundNumber = -5;
         }
-    } while (false);
+    }
 
     if (mCurrentCup->mRoundNumber == -5)
     {
@@ -3046,6 +3043,23 @@ void GameInfoManager::OnPostCupGameState()
     }
 }
 
+// File-local helper: the retail MAP lists every dead-stripped GameInfoManager
+// member and has no super-cup query, so this was not a class member. The
+// switch + return shape is what produces the retail branch layout in the
+// inlined copy inside DetermineNextCupScreen().
+static bool IsSuperCupMode(const GameInfoManager* pInfo)
+{
+    switch (pInfo->mCurrentMode)
+    {
+    case GameInfoManager::GM_SUPER_MUSHROOM_CUP:
+    case GameInfoManager::GM_SUPER_FLOWER_CUP:
+    case GameInfoManager::GM_SUPER_STAR_CUP:
+    case GameInfoManager::GM_SUPER_BOWSER_CUP:
+        return true;
+    }
+    return false;
+}
+
 /**
  * Offset/Address/Size: 0x23FC | 0x80177AA0 | size: 0x170
  */
@@ -3072,26 +3086,8 @@ void GameInfoManager::DetermineNextCupScreen()
         TimeStampCupEnd();
     }
 
-    bool isSuper;
-    mDisplayTrophy[0] = (isSuper = true);
-    if (mCurrentMode < GM_TOURNAMENT)
-    {
-        if (mCurrentMode >= GM_SUPER_MUSHROOM_CUP)
-        {
-        }
-        else
-        {
-            // Match target's shared false-path branch instead of duplicating the assignment.
-            asm { b notSuperCup }
-        }
-        asm { b superCupDone }
-    }
-    else
-    {
-    notSuperCup:
-        isSuper = false;
-    }
-superCupDone:
+    mDisplayTrophy[0] = true;
+    bool isSuper = IsSuperCupMode(this);
 
     SceneList nextScene = isSuper ? SCENE_SUPER_CUP_STANDINGS_ANIM : SCENE_CUP_STANDINGS_ANIM;
     if (mCurrentCup->mRoundNumber == -1)

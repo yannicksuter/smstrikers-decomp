@@ -2248,10 +2248,7 @@ bool cFielder::DoLooseBallContactFromRun(nlVector3& v3AnimStartPosition, float& 
         float deltaY = v3SimulatedBallPos.y - passInterceptY;
         distSq = deltaX * deltaX + deltaY * deltaY;
 
-        if (distSq < bestDistToPassInterceptSquared)
-        {
-        }
-        else if (fSimulatedTime != FixedUpdateTask::GetPhysicsUpdateTick())
+        if (!(distSq < bestDistToPassInterceptSquared) && fSimulatedTime != FixedUpdateTask::GetPhysicsUpdateTick())
         {
             break;
         }
@@ -4620,10 +4617,7 @@ void cFielder::SetDesiredSpeedAndDirectionToPosition(float fDeltaT, const nlVect
     float fDesiredPositionRateOfChange = 0.0f;
     float fZero = fDesiredPositionRateOfChange;
     float bAtTarget = (float)(fabsf(fDistSq - fZero) <= 0.0001f);
-    if (bAtTarget != fZero)
-    {
-    }
-    else
+    if (!(bAtTarget != fZero))
     {
         fDesiredPositionRateOfChange = nlSqrt(fDeltaXFromDesired * fDeltaXFromDesired + fDeltaYFromDesired * fDeltaYFromDesired + fDeltaZFromDesired * fDeltaZFromDesired, true) / fDeltaT;
         float fAngle = nlATan2f(v3FixedPos.y - m_v3Position.y, v3FixedPos.x - m_v3Position.x);
@@ -5103,27 +5097,16 @@ void cFielder::TestCollisionForInvicibility(cFielder* pOpponent)
         return;
     }
 
-    do
+    if (IsInvincible() && !pOpponent->IsInvincible())
     {
-        if (IsInvincible())
-        {
-            if (!pOpponent->IsInvincible())
-            {
-                pReactee = pOpponent;
-                pAttacker = this;
-                break;
-            }
-        }
-
-        if (pOpponent->IsInvincible())
-        {
-            if (!IsInvincible())
-            {
-                pReactee = this;
-                pAttacker = pOpponent;
-            }
-        }
-    } while (false);
+        pReactee = pOpponent;
+        pAttacker = this;
+    }
+    else if (pOpponent->IsInvincible() && !IsInvincible())
+    {
+        pReactee = this;
+        pAttacker = pOpponent;
+    }
 
     if (pReactee == NULL)
         return;

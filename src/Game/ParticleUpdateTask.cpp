@@ -18,8 +18,6 @@ void ParticleUpdateTask::SetTimeScale(float timeScale)
  */
 void ParticleUpdateTask::Run(float dt)
 {
-    EmissionManager* var_r3;
-
     if (g_bRenderWorld)
     {
         if (g_e3_Build)
@@ -32,11 +30,6 @@ void ParticleUpdateTask::Run(float dt)
             {
                 EmissionManager::Update(dt * sfTimeScale);
             }
-            // var_r3 = m_pInstance__13nlTaskManager.unk0;
-            // if (var_r3->unk8 != 1)
-            // {
-            //     var_r3 = Update__15EmissionManagerFf(var_r3, arg0 * sfTimeScale__18ParticleUpdateTask.unk0);
-            // }
         }
         EmissionManager::Render();
     }

@@ -7,7 +7,7 @@
 
 struct THPSimpleControl
 {
-    /* 0x00 */ nlFile* file;
+    /* 0x00 */ nlFile* fileInfo;
     /* 0x04 */ char magic[4];
     /* 0x08 */ u32 version;
     /* 0x0C */ u32 bufSize;
@@ -29,13 +29,13 @@ struct THPSimpleControl
     /* 0x6D */ u8 audioState;
     /* 0x6E */ u8 loop;
     /* 0x6F */ u8 audioExist;
-    /* 0x70 */ u32 curOffset;
+    /* 0x70 */ s32 curOffset;
     /* 0x74 */ s32 dvdError;
     /* 0x78 */ u32 readProgress;
     /* 0x7C */ s32 nextDecodeIndex;
     /* 0x80 */ s32 readIndex;
-    /* 0x84 */ u32 readSize;
-    /* 0x88 */ u32 totalReadFrame;
+    /* 0x84 */ s32 readSize;
+    /* 0x88 */ s32 totalReadFrame;
     /* 0x8C */ f32 curVolume;
     /* 0x90 */ f32 targetVolume;
     /* 0x94 */ f32 deltaVolume;

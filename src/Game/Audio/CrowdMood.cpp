@@ -135,6 +135,9 @@ unsigned char CrowdMood::IsStreamLocked()
  */
 void ChangeCrowdVolume(float NewVolume)
 {
+    // Without this MWCC auto-inlines the function into SetCrowdVolume/UpdateTiming.
+    FORCE_DONT_INLINE;
+
     MOOD_DEFINITION MoodDef;
     g_CrowdState.CrowdVolume = NewVolume * g_Settings.CrowdMasterVolume;
     MoodDefFromBlend(g_CrowdState.CurrentMoodBlend, MoodDef);
@@ -146,69 +149,13 @@ void ChangeCrowdVolume(float NewVolume)
         GCAudioStreaming::StereoAudioStream* pChant = g_CrowdAudio.pChantStream;
         if (pChant != NULL)
         {
-            if (pChant->m_State >= GCAudioStreaming::SS_Warming)
-            {
-                GCAudioStreaming::AudioStreamBuffer* buf;
-                volatile unsigned long i = (unsigned long)(buf = NULL);
-                unsigned long start = 0;
-
-                if (start < pChant->m_BufferCount)
-                {
-                    buf = pChant->m_Buffers[0];
-                }
-
-                while (buf != NULL)
-                {
-                    buf->m_Volume = 0;
-                    sndStreamMixParameterEx(buf->m_StreamId, buf->m_Volume, buf->m_Pan, buf->m_SurroundPan, 0, 0);
-
-                    unsigned long ci = i + 1;
-                    i = ci;
-                    if (ci < pChant->m_BufferCount)
-                    {
-                        buf = pChant->m_Buffers[ci];
-                    }
-                    else
-                    {
-                        buf = NULL;
-                    }
-                }
-            }
-            pChant->m_Volume = 0;
+            pChant->SetVolume(0);
         }
 
         GCAudioStreaming::MonoAudioStream* pHeckle = g_CrowdAudio.pHeckleStream;
         if (pHeckle != NULL)
         {
-            if (pHeckle->m_State >= GCAudioStreaming::SS_Warming)
-            {
-                GCAudioStreaming::AudioStreamBuffer* buf;
-                volatile unsigned long i = (unsigned long)(buf = NULL);
-                unsigned long start = 0;
-
-                if (start < pHeckle->m_BufferCount)
-                {
-                    buf = pHeckle->m_Buffers[0];
-                }
-
-                while (buf != NULL)
-                {
-                    buf->m_Volume = 0;
-                    sndStreamMixParameterEx(buf->m_StreamId, buf->m_Volume, buf->m_Pan, buf->m_SurroundPan, 0, 0);
-
-                    unsigned long ci = i + 1;
-                    i = ci;
-                    if (ci < pHeckle->m_BufferCount)
-                    {
-                        buf = pHeckle->m_Buffers[ci];
-                    }
-                    else
-                    {
-                        buf = NULL;
-                    }
-                }
-            }
-            pHeckle->m_Volume = 0;
+            pHeckle->SetVolume(0);
         }
     }
 }

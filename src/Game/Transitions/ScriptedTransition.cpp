@@ -144,16 +144,16 @@ public:
     virtual void ApplyModifier(glPoly2& poly, float time)
     {
         nlColour col;
-        s32 temp_r6;
-        u32 temp_r3;
+        s32 startWeight;
+        u32 endWeight;
 
-        temp_r3 = 255.0f * time;
-        temp_r6 = 0xFF - temp_r3;
+        endWeight = 255.0f * time;
+        startWeight = 0xFF - endWeight;
 
-        col.c[0] = ((temp_r6 * m_cStartColour.c[0]) + (temp_r3 * m_cEndColour.c[0])) >> 8;
-        col.c[1] = ((temp_r6 * m_cStartColour.c[1]) + (temp_r3 * m_cEndColour.c[1])) >> 8;
-        col.c[2] = ((temp_r6 * m_cStartColour.c[2]) + (temp_r3 * m_cEndColour.c[2])) >> 8;
-        col.c[3] = ((temp_r6 * m_cStartColour.c[3]) + (temp_r3 * m_cEndColour.c[3])) >> 8;
+        col.c[0] = ((startWeight * m_cStartColour.c[0]) + (endWeight * m_cEndColour.c[0])) >> 8;
+        col.c[1] = ((startWeight * m_cStartColour.c[1]) + (endWeight * m_cEndColour.c[1])) >> 8;
+        col.c[2] = ((startWeight * m_cStartColour.c[2]) + (endWeight * m_cEndColour.c[2])) >> 8;
+        col.c[3] = ((startWeight * m_cStartColour.c[3]) + (endWeight * m_cEndColour.c[3])) >> 8;
         poly.SetColour(col);
     }
 
@@ -590,17 +590,17 @@ class ToScreenCoordinates : public TransitionModifierInterface
 public:
     ToScreenCoordinates()
     {
-        float temp_f30 = 0.5f * glGetOrthographicWidth();
-        float temp_f31 = 0.5f * glGetOrthographicHeight();
-        float temp_f1 = -glGetScreenInfo()->PixelCentre;
+        float halfWidth = 0.5f * glGetOrthographicWidth();
+        float halfHeight = 0.5f * glGetOrthographicHeight();
+        float pixelOffset = -glGetScreenInfo()->PixelCentre;
 
         m_m3Position.SetIdentity();
         m_m3UV.SetIdentity();
 
-        m_m3Position.m11 = temp_f30;
-        m_m3Position.m22 = temp_f31;
-        m_m3Position.m31 = temp_f30 - temp_f1;
-        m_m3Position.m32 = temp_f31 - temp_f1;
+        m_m3Position.m11 = halfWidth;
+        m_m3Position.m22 = halfHeight;
+        m_m3Position.m31 = halfWidth - pixelOffset;
+        m_m3Position.m32 = halfHeight - pixelOffset;
 
         m_m3UV.m32 = 0.5f;
         m_m3UV.m31 = 0.5f;
@@ -699,10 +699,10 @@ void ScriptedScreenTransition::Render(eGLView view)
     nlVec2Set(poly.m_uv[2], 1.0f, 1.0f);
     nlVec2Set(poly.m_uv[3], 1.0f, -1.0f);
 
-    *(u32*)&poly.m_colour[0] = *(u32*)&colour; // sp4C (0x4C) -> offset 0x40
-    *(u32*)&poly.m_colour[1] = *(u32*)&colour; // sp50 (0x50) -> offset 0x44
-    *(u32*)&poly.m_colour[2] = *(u32*)&colour; // sp54 (0x54) -> offset 0x48
-    *(u32*)&poly.m_colour[3] = *(u32*)&colour; // sp58 (0x58) -> offset 0x4C
+    poly.m_colour[0] = colour;
+    poly.m_colour[1] = colour;
+    poly.m_colour[2] = colour;
+    poly.m_colour[3] = colour;
 
     // *(u32*)&colour = 0xFFFFFFFF;
     float normalizedTime;
@@ -781,16 +781,16 @@ void ScriptedScreenTransition::InitializeFromParser(SimpleParser* parser)
         }
         else if (nlStrCmp<char>(pToken, "time") == 0)
         {
-            char* temp_r3 = parser->NextTokenOnLine(true);
-            if (nlStrCmp<char>(temp_r3, "linear") == 0)
+            char* pToken = parser->NextTokenOnLine(true);
+            if (nlStrCmp<char>(pToken, "linear") == 0)
             {
                 m_eTimeLine = TIME_LINEAR;
             }
-            else if (nlStrCmp<char>(temp_r3, "accelerate") == 0)
+            else if (nlStrCmp<char>(pToken, "accelerate") == 0)
             {
                 m_eTimeLine = TIME_ACCEL;
             }
-            else if (nlStrCmp<char>(temp_r3, "decelarate") == 0)
+            else if (nlStrCmp<char>(pToken, "decelarate") == 0)
             {
                 m_eTimeLine = TIME_DECEL;
             }

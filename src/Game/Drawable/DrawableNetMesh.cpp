@@ -257,7 +257,7 @@ void DrawableNetMesh::Render() const
         {
             int i;
             unsigned short* pIndex = pTriIndices;
-            for (i = 0; i < ((const volatile DrawableNetMesh*)this)->m_unk18; pIndex++, i++)
+            for (i = 0; i < m_unk18; pIndex++, i++)
             {
                 unsigned short index = *pIndex;
                 float darkPos = WorldDarkening::Instance().mPos;
@@ -353,8 +353,8 @@ void DrawableNetMesh::Blend(float blendFactor, const DrawableNetMesh& lhs, const
 
     if (!mbInitialized)
     {
-        int numTriIdx = ((const volatile DrawableNetMesh*)&lhs)->m_unk18;
-        mJolt = ((const volatile DrawableNetMesh*)&lhs)->mJolt;
+        int numTriIdx = lhs.m_unk18;
+        mJolt = lhs.mJolt;
         m_unk18 = numTriIdx;
 
         int numVerts = mJolt;
@@ -387,8 +387,8 @@ void DrawableNetMesh::Blend(float blendFactor, const DrawableNetMesh& lhs, const
     int i;
     for (i = 0, offset = 0; i < mJolt; i++, offset += sizeof(nlVector3))
     {
-        pSrc = (nlVector3*)((char*)((const volatile DrawableNetMesh*)&lhs)->mpPosition + offset);
-        pDst = (nlVector3*)((char*)((volatile DrawableNetMesh*)this)->mpPosition + offset);
+        pSrc = (nlVector3*)((char*)lhs.mpPosition + offset);
+        pDst = (nlVector3*)((char*)mpPosition + offset);
         float x = oneMinusBlend * pSrc->x;
         float y = pSrc->y;
         float z = pSrc->z;
@@ -401,8 +401,8 @@ void DrawableNetMesh::Blend(float blendFactor, const DrawableNetMesh& lhs, const
 
     for (int i = 0; i < mJolt; i++)
     {
-        pDst = &((volatile DrawableNetMesh*)this)->mpPosition[i];
-        pSrc = (nlVector3*)&((const volatile DrawableNetMesh*)&rhs)->mpPosition[i];
+        pDst = &mpPosition[i];
+        pSrc = (nlVector3*)&rhs.mpPosition[i];
         float x = pDst->x + blendFactor * pSrc->x;
         float z = pDst->z + blendFactor * pSrc->z;
         float y = pDst->y + blendFactor * pSrc->y;

@@ -23,19 +23,19 @@ void ColourBlendScreenTransition::Render(eGLView view)
     struct nlColour colour;
     class nlVector4 v4Clr;
 
-    float temp_f8;
-    float temp_f9;
+    float startWeight;
+    float endWeight;
     nlVector4 tmp = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     if (m_fLength > 0.0001f)
     {
-        temp_f9 = m_fCurrentTime / m_fLength;
-        temp_f8 = 1.0f - temp_f9;
+        endWeight = m_fCurrentTime / m_fLength;
+        startWeight = 1.0f - endWeight;
         nlVec4Set(tmp,
-            (temp_f8 * m_RGBAstart.e[0]) + (temp_f9 * m_RGBAend.e[0]),
-            (temp_f8 * m_RGBAstart.e[1]) + (temp_f9 * m_RGBAend.e[1]),
-            (temp_f8 * m_RGBAstart.e[2]) + (temp_f9 * m_RGBAend.e[2]),
-            (temp_f8 * m_RGBAstart.e[3]) + (temp_f9 * m_RGBAend.e[3]));
+            (startWeight * m_RGBAstart.e[0]) + (endWeight * m_RGBAend.e[0]),
+            (startWeight * m_RGBAstart.e[1]) + (endWeight * m_RGBAend.e[1]),
+            (startWeight * m_RGBAstart.e[2]) + (endWeight * m_RGBAend.e[2]),
+            (startWeight * m_RGBAstart.e[3]) + (endWeight * m_RGBAend.e[3]));
     }
 
     v4Clr = tmp;

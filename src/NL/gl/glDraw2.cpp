@@ -259,31 +259,31 @@ void glPoly2::SetupRotatedRectangle(float cx, float cy, float w, float h, float 
 {
     nlVector2 v;
     nlMatrix3 m;
-    float f3 = 0.5f;
-    f32 temp_f26;
-    f32 temp_f25;
-    f32 temp_f31;
-    f32 temp_f29;
+    float half = 0.5f;
+    f32 negHalfW;
+    f32 halfH;
+    f32 negHalfH;
+    f32 halfW;
 
     nlMakeRotationMatrixZ(m, angle);
 
-    temp_f26 = -w * f3;
-    temp_f31 = -h * f3;
-    nlVec2Set(v, temp_f26, temp_f31);
+    negHalfW = -w * half;
+    negHalfH = -h * half;
+    nlVec2Set(v, negHalfW, negHalfH);
     nlMultVectorMatrix(v, v, m);
     nlVec2Set(m_pos[0], v.x + cx, v.y + cy);
 
-    temp_f25 = h * f3;
-    nlVec2Set(v, temp_f26, temp_f25);
+    halfH = h * half;
+    nlVec2Set(v, negHalfW, halfH);
     nlMultVectorMatrix(v, v, m);
     nlVec2Set(m_pos[1], v.x + cx, v.y + cy);
 
-    temp_f29 = w * f3;
-    nlVec2Set(v, temp_f29, temp_f25);
+    halfW = w * half;
+    nlVec2Set(v, halfW, halfH);
     nlMultVectorMatrix(v, v, m);
     nlVec2Set(m_pos[2], v.x + cx, v.y + cy);
 
-    nlVec2Set(v, temp_f29, temp_f31);
+    nlVec2Set(v, halfW, negHalfH);
     nlMultVectorMatrix(v, v, m);
     nlVec2Set(m_pos[3], v.x + cx, v.y + cy);
 

@@ -497,10 +497,7 @@ void cTeam::UpdateControllers()
     {
         if (pOwner->m_eClassType == GOALIE)
         {
-            if (g_pGame->IsGameplayOrOvertime() && !((Goalie*)pOwner)->mbNoUserControl)
-            {
-            }
-            else
+            if (!(g_pGame->IsGameplayOrOvertime() && !((Goalie*)pOwner)->mbNoUserControl))
             {
                 return;
             }

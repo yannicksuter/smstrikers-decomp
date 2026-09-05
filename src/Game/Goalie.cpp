@@ -822,25 +822,7 @@ void Goalie::CollideWithCharacterCallback(CollisionPlayerPlayerData* pData)
             anim = mpLooseBallInfo->mnAnimID;
             if (anim != m_eAnimID)
             {
-                do
-                {
-                    if (anim == m_eAnimID)
-                    {
-                        cPN_SAnimController* pController = m_pCurrentAnimController;
-                        u8 bShouldSetAnim = false;
-                        if (pController->m_ePlayMode == PM_HOLD && pController->m_fTime == 1.0f)
-                        {
-                            bShouldSetAnim = true;
-                        }
-
-                        if (!bShouldSetAnim)
-                        {
-                            break;
-                        }
-                    }
-
-                    SetAnimState(anim, true, 0.2f, false, false);
-                } while (0);
+                PlayNewAnim(anim);
 
                 cPN_SAnimController* pController = m_pCurrentAnimController;
                 f32 fPickupTime = mpLooseBallInfo->mfPickupTime;
@@ -1248,22 +1230,7 @@ void Goalie::InitActionPreCrouch(eGoalieCrouchType crouchType)
     mGoalieActionState = GOALIEACTION_PRE_CROUCH;
     mnSubstate = 0;
 
-    do
-    {
-        if (m_eAnimID == 0x2e)
-        {
-            bool bShouldSetAnim = false;
-            if (m_pCurrentAnimController->m_ePlayMode == PM_HOLD && m_pCurrentAnimController->m_fTime == 1.0f)
-            {
-                bShouldSetAnim = true;
-            }
-
-            if (!bShouldSetAnim)
-                break;
-        }
-
-        SetAnimState(0x2e, true, 0.2f, false, false);
-    } while (false);
+    PlayNewAnim(0x2e);
 
     InitMovementFromAnim(0, v3Zero, 0.0f, false);
 }
@@ -2824,24 +2791,21 @@ bool Goalie::CheckForSTSAttack()
 
                 if (!bInNetZone)
                 {
-                    if (distSqFielder < distSqGoalie)
+                    if (!(distSqFielder < distSqGoalie))
                     {
-                    }
-                    else
-                    {
-                        if (ownerDistSq <= fCloseDistSq)
+                        if (!(ownerDistSq <= fCloseDistSq))
                         {
-                        }
-                        else if (ownerDistSq <= fMaxDistSq)
-                        {
-                            if (!randgenSTS.genrand(((GoalieTweaks*)m_pTweaks)->fSTSAttackChancePerFrame))
+                            if (ownerDistSq <= fMaxDistSq)
+                            {
+                                if (!randgenSTS.genrand(((GoalieTweaks*)m_pTweaks)->fSTSAttackChancePerFrame))
+                                {
+                                    break;
+                                }
+                            }
+                            else
                             {
                                 break;
                             }
-                        }
-                        else
-                        {
-                            break;
                         }
                     }
                 }
@@ -2882,10 +2846,7 @@ bool Goalie::IsLooseBallClose(float fDistFromBox)
                 float dxToBall = m_v3Position.x - pBall->m_v3Position.x;
                 float distToPassTargetSq = nlGetLengthSquared2D(dxToTarget, dyToTarget);
                 float distToBallSq = nlGetLengthSquared2D(dxToBall, dyToBall);
-                if (distToBallSq > distToPassTargetSq)
-                {
-                }
-                else
+                if (!(distToBallSq > distToPassTargetSq))
                 {
                     break;
                 }
@@ -3109,7 +3070,7 @@ bool Goalie::IsOpponentInSTS()
  */
 bool Goalie::IsPassThreat()
 {
-    bool var_r0;
+    bool bThreatInBox;
 
     cPlayer* pPassTarget = g_pBall->m_pPassTarget;
     if (pPassTarget != NULL)
@@ -3124,14 +3085,14 @@ bool Goalie::IsPassThreat()
                 && (ballPassX * m_v3Position.x > 0.0f)
                 && ((float)fabs(pBall->m_v3PassIntercept.y) < (cField::GetPenaltyBoxY() + 1.0f)))
             {
-                var_r0 = true;
+                bThreatInBox = true;
             }
             else
             {
-                var_r0 = false;
+                bThreatInBox = false;
             }
 
-            if (var_r0)
+            if (bThreatInBox)
             {
                 mpPassTarget = pPassTarget;
                 muBallDeflectCount = g_pBall->m_bBallDeflectCount;

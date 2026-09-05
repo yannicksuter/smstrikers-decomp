@@ -159,7 +159,8 @@ void GCSwizzle(void* pSwizzledData, const void* pLinearData, unsigned short widt
     }
     else if (stride == (int)((unsigned int)width >> 1))
     {
-        // 4 bits per pixel is not supported
+        // 4 bits per pixel is not supported: the destination is left untouched.
+        // Intentionally empty in retail as well (the compare is still emitted).
     }
     else if (stride == width)
     {

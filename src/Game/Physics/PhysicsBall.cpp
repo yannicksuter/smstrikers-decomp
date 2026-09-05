@@ -193,13 +193,6 @@ ContactType PhysicsBall::Contact(PhysicsObject* other, dContact* contact, int pa
     nlVector3 pos;
     nlVector3 _pos;
 
-    f32 temp_f0;
-    f32 temp_f1;
-    f32 temp_f1_2;
-    f32 temp_f2;
-    f32 temp_f29;
-    f32 temp_f30;
-    f32 temp_f31;
     s32 objType;
     s32 i;
     dContact* c;
@@ -230,10 +223,13 @@ ContactType PhysicsBall::Contact(PhysicsObject* other, dContact* contact, int pa
             {
                 _pos = GetPosition();
 
-                temp_f2 = contact->geom.normal[2];
-                temp_f1 = contact->geom.depth;
-                temp_f31 = temp_f2 * temp_f1;
-                _pos.z += temp_f31;
+                float nx;
+                float ny;
+                float pushZ;
+
+                // Lift the ball out along the vertical part of the contact.
+                pushZ = contact->geom.normal[2] * contact->geom.depth;
+                _pos.z += pushZ;
                 SetPosition(_pos, WORLD_COORDINATES);
 
                 if (contact->geom.normal[2] > 0.95f)
@@ -241,18 +237,14 @@ ContactType PhysicsBall::Contact(PhysicsObject* other, dContact* contact, int pa
                     return NO_CONTACT;
                 }
 
-                temp_f30 = contact->geom.normal[1];
-                temp_f29 = contact->geom.normal[0];
-                temp_f1 = kZeroF[0];
-                temp_f0 = temp_f30 * temp_f30;
-                temp_f0 = (temp_f29 * temp_f29) + temp_f0;
-                temp_f1 = temp_f1 + temp_f0;
-                temp_f1_2 = nlRecipSqrt(temp_f1, true);
-                contact->geom.normal[0] = (f32)(temp_f1_2 * temp_f29);
-                contact->geom.normal[1] = (f32)(temp_f1_2 * temp_f30);
-                temp_f0 = kZeroF[0];
-                contact->geom.normal[2] = (f32)(temp_f1_2 * temp_f0);
-                contact->geom.depth = (f32)(contact->geom.depth - temp_f31);
+                // Flatten the contact normal into the XY plane and renormalise it.
+                ny = contact->geom.normal[1];
+                nx = contact->geom.normal[0];
+                float invLen = nlRecipSqrt(kZeroF[0] + ((nx * nx) + (ny * ny)), true);
+                contact->geom.normal[0] = invLen * nx;
+                contact->geom.normal[1] = invLen * ny;
+                contact->geom.normal[2] = invLen * kZeroF[0];
+                contact->geom.depth = contact->geom.depth - pushZ;
             }
         }
         return m_parentObject->Contact(other, contact, param);

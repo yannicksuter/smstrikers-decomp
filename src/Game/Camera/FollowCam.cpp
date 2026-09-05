@@ -81,7 +81,8 @@ void cFollowCamera::Update(float fDeltaT)
     }
     else if (m_FollowTarget == FOLLOW_ANIM_VIEWER_CHARACTER)
     {
-        // EMPTY
+        // Development-only target: the retail build has no body here and keeps
+        // m_v3OOI unchanged. The branch must stay, a switch changes the codegen.
     }
     else if (m_FollowTarget == FOLLOW_SELECTABLE)
     {

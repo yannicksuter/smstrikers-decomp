@@ -623,10 +623,7 @@ cFielder* cPlayer::GetClosestOpponentFielder(nlVector3* pPosition)
  */
 void cPlayer::PickupBall(cBall* pBall)
 {
-    if (m_eClassType == GOALIE && ((Goalie*)this)->mbNoUserControl)
-    {
-    }
-    else
+    if (!(m_eClassType == GOALIE && ((Goalie*)this)->mbNoUserControl))
     {
         cGlobalPad* hasPad = (m_pController != NULL) ? m_pController->m_pGlobalPad : NULL;
         if (hasPad == NULL)
@@ -658,10 +655,7 @@ void cPlayer::PickupBall(cBall* pBall)
 
                         if (passTarget == NULL || closest != g_pBall->m_pPrevOwner)
                         {
-                            if (distSq < bestDistSq)
-                            {
-                            }
-                            else
+                            if (!(distSq < bestDistSq))
                             {
                                 continue;
                             }

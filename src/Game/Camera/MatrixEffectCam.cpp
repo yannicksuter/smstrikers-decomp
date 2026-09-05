@@ -101,8 +101,8 @@ void MatrixEffectCam::Update(float dt)
             mCurrentPolarFromTarget.a = (u16)((u16)mCurrentPolarFromTarget.a + (u16)steps);
         }
 
-        bool var_r0 = (mbZoomingIn && (mCurrentPolarFromTarget.r > mfDesiredDistanceFromTarget)) || (!mbZoomingIn && (mCurrentPolarFromTarget.r < mfDesiredDistanceFromTarget));
-        if (var_r0)
+        bool bReachedZoomDistance = (mbZoomingIn && (mCurrentPolarFromTarget.r > mfDesiredDistanceFromTarget)) || (!mbZoomingIn && (mCurrentPolarFromTarget.r < mfDesiredDistanceFromTarget));
+        if (bReachedZoomDistance)
         {
             if (mfElapsedTime >= mfZoomTime)
             {

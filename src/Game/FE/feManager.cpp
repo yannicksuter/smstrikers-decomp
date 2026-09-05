@@ -129,10 +129,7 @@ void FrontEnd::Update(float fTimeDelta)
     if (nlSingleton<GameInfoManager>::Instance()->IsInDemoMode())
     {
         m_fDemoTimeElapsed += fTimeDelta;
-        if (m_fDemoTimeElapsed < 3.0f)
-        {
-        }
-        else
+        if (!(m_fDemoTimeElapsed < 3.0f))
         {
             nlSingleton<OverlayManager>::Instance()->ShowDemoSlide();
             if (g_pFEInput->JustPressed(FE_ALL_PADS, 0x1F00, false, NULL))

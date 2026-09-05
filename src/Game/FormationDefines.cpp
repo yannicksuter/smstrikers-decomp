@@ -230,14 +230,9 @@ FormationSpec* FormationSet::GetFormationSpec(int index) const
  */
 FormationSpec* FormationSet::GetFormationSpecFromID(int formationID) const
 {
-    // Check for negative ID
-    if (formationID < 0 || formationID >= m_NumFormationDefs)
+    // Try direct index access first, then fall back to a linear search
+    if (formationID >= 0 && formationID < m_NumFormationDefs)
     {
-        // Fall through to linear search
-    }
-    else
-    {
-        // Try direct index access first
         FormationSpec* spec = &m_FormationDefArray[formationID];
         if (formationID == spec->m_ID)
         {

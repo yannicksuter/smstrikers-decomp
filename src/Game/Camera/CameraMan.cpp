@@ -728,8 +728,8 @@ void cCameraManager::SetWorldUpVectorTilt(float fXAxisTilt, float fYAxisTilt)
     float xx = pUp->x * pUp->x;
     float yy = pUp->y * pUp->y;
     float zz = pUp->z * pUp->z;
-    float temp_f1 = nlRecipSqrt(xx + yy + zz, true);
-    nlVec3Scale(*pUp, temp_f1);
+    float invLen = nlRecipSqrt(xx + yy + zz, true);
+    nlVec3Scale(*pUp, invLen);
 }
 
 void cCameraManager::StopCurrentCamRumbleFilterSFXLoop()

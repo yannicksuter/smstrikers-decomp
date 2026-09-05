@@ -143,17 +143,17 @@ void glEndFrame()
  */
 void glBeginFrame()
 {
-    s32 var_r31;
+    s32 view;
 
     glplatBeginFrame();
-    var_r31 = 0;
+    view = 0;
     gl_state = 1;
     do
     {
-        glViewSetProjectionMatrix((eGLView)var_r31, glGetIdentityMatrix());
-        glViewSetViewMatrix((eGLView)var_r31, glGetIdentityMatrix());
-        var_r31 += 1;
-    } while (var_r31 < 0x22);
+        glViewSetProjectionMatrix((eGLView)view, glGetIdentityMatrix());
+        glViewSetViewMatrix((eGLView)view, glGetIdentityMatrix());
+        view += 1;
+    } while (view < 0x22);
 }
 
 /**
@@ -185,7 +185,7 @@ u32 glHash(const char* string)
  */
 bool glStartup()
 {
-    s32 var_r31;
+    s32 type;
 
     gl_frameCounter = 0;
     gl_nDiscard = 0;
@@ -198,12 +198,12 @@ bool glStartup()
 
     gl_StatStartup();
     gl_StateStartup();
-    var_r31 = 0;
+    type = 0;
     do
     {
-        glSetCurrentTexture(-1, (eGLTextureType)var_r31);
-        var_r31 += 1;
-    } while (var_r31 < 6);
+        glSetCurrentTexture(-1, (eGLTextureType)type);
+        type += 1;
+    } while (type < 6);
 
     glSetCurrentProgram(-1);
     glSetRasterStateDefaults();

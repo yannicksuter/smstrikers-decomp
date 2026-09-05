@@ -474,10 +474,7 @@ void CupHubScene::Update(float fDeltaT)
     {
         presentation = m_pFEScene->m_pFEPackage->GetPresentation();
 
-        if (presentation->m_currentSlide->m_time >= (presentation->m_currentSlide->m_start + presentation->m_currentSlide->m_duration))
-        {
-        }
-        else
+        if (!(presentation->m_currentSlide->m_time >= (presentation->m_currentSlide->m_start + presentation->m_currentSlide->m_duration)))
         {
             return;
         }

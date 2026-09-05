@@ -717,12 +717,9 @@ void Bowser::ActionInit()
     eBowserAttackType savedAttackType;
     u32 savedVisible;
 
-    if (!nlSingleton<GameInfoManager>::Instance()->IsTiltingFieldOn()
-        && nlSingleton<GameInfoManager>::Instance()->IsBowserAttackEnabled()
-        && !nlSingleton<GameInfoManager>::Instance()->mIsInStrikers101Mode)
-    {
-    }
-    else
+    if (nlSingleton<GameInfoManager>::Instance()->IsTiltingFieldOn()
+        || !nlSingleton<GameInfoManager>::Instance()->IsBowserAttackEnabled()
+        || nlSingleton<GameInfoManager>::Instance()->mIsInStrikers101Mode)
     {
         return;
     }

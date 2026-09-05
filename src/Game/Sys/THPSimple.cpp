@@ -16,48 +16,6 @@ extern "C" void* memcpy(void*, const void*, unsigned long);
 extern "C" void* memset(void*, int, unsigned long);
 extern "C" int strcmp(const char*, const char*);
 
-struct THPSimpleControlWork
-{
-    /* 0x00 */ nlFile* fileInfo;
-    /* 0x04 */ char magic[4];
-    /* 0x08 */ unsigned long version;
-    /* 0x0C */ unsigned long bufSize;
-    /* 0x10 */ unsigned long audioMaxSamples;
-    /* 0x14 */ float frameRate;
-    /* 0x18 */ unsigned long numFrames;
-    /* 0x1C */ unsigned long firstFrameSize;
-    /* 0x20 */ unsigned long movieDataSize;
-    /* 0x24 */ unsigned long compInfoDataOffsets;
-    /* 0x28 */ unsigned long offsetDataOffsets;
-    /* 0x2C */ unsigned long movieDataOffsets;
-    /* 0x30 */ unsigned long finalFrameDataOffsets;
-    /* 0x34 */ THPFrameCompInfo compInfo;
-    /* 0x48 */ THPVideoInfo videoInfo;
-    /* 0x54 */ THPAudioInfo audioInfo;
-    /* 0x64 */ void* thpWork;
-    /* 0x68 */ int open;
-    /* 0x6C */ unsigned char preFetchState;
-    /* 0x6D */ unsigned char audioState;
-    /* 0x6E */ unsigned char loop;
-    /* 0x6F */ unsigned char audioExist;
-    /* 0x70 */ long curOffset;
-    /* 0x74 */ int dvdError;
-    /* 0x78 */ unsigned long readProgress;
-    /* 0x7C */ long nextDecodeIndex;
-    /* 0x80 */ long readIndex;
-    /* 0x84 */ long readSize;
-    /* 0x88 */ long totalReadFrame;
-    /* 0x8C */ float curVolume;
-    /* 0x90 */ float targetVolume;
-    /* 0x94 */ float deltaVolume;
-    /* 0x98 */ long rampCount;
-    /* 0x9C */ THPReadBuffer readBuffer[16];
-    /* 0x15C */ THPTextureSet textureSet;
-    /* 0x16C */ THPAudioBuffer audioBuffer[6];
-    /* 0x1B4 */ long audioDecodeIndex;
-    /* 0x1B8 */ long audioOutputIndex;
-};
-
 static THPSimpleControl SimpleControl;
 static s32 NumReadBuffers;
 static int NumAudioBuffers;
@@ -281,83 +239,83 @@ extern "C" int THPSimpleOpen(const char* fileName)
         return 0;
     }
 
-    if (((THPSimpleControlWork*)&SimpleControl)->open)
+    if (SimpleControl.open)
     {
         return 0;
     }
 
-    memset(&((THPSimpleControlWork*)&SimpleControl)->videoInfo, 0, sizeof(THPVideoInfo));
-    memset(&((THPSimpleControlWork*)&SimpleControl)->audioInfo, 0, sizeof(THPAudioInfo));
+    memset(&SimpleControl.videoInfo, 0, sizeof(THPVideoInfo));
+    memset(&SimpleControl.audioInfo, 0, sizeof(THPAudioInfo));
 
-    SimpleControl.file = nlOpen(fileName);
-    if (!SimpleControl.file)
+    SimpleControl.fileInfo = nlOpen(fileName);
+    if (!SimpleControl.fileInfo)
     {
         return 0;
     }
 
-    nlRead(SimpleControl.file, WorkBuffer, sizeof(WorkBuffer));
-    memcpy(((THPSimpleControlWork*)&SimpleControl)->magic, WorkBuffer, sizeof(THPHeader));
+    nlRead(SimpleControl.fileInfo, WorkBuffer, sizeof(WorkBuffer));
+    memcpy(SimpleControl.magic, WorkBuffer, sizeof(THPHeader));
 
-    if (strcmp(((THPSimpleControlWork*)&SimpleControl)->magic, "THP") != 0)
+    if (strcmp(SimpleControl.magic, "THP") != 0)
     {
-        nlClose(((THPSimpleControlWork*)&SimpleControl)->fileInfo);
-        ((THPSimpleControlWork*)&SimpleControl)->fileInfo = NULL;
+        nlClose(SimpleControl.fileInfo);
+        SimpleControl.fileInfo = NULL;
         return 0;
     }
 
-    if (((THPSimpleControlWork*)&SimpleControl)->version != 0x00011000)
+    if (SimpleControl.version != 0x00011000)
     {
-        nlClose(((THPSimpleControlWork*)&SimpleControl)->fileInfo);
-        ((THPSimpleControlWork*)&SimpleControl)->fileInfo = NULL;
+        nlClose(SimpleControl.fileInfo);
+        SimpleControl.fileInfo = NULL;
         return 0;
     }
 
-    offset = ((THPSimpleControlWork*)&SimpleControl)->compInfoDataOffsets;
-    nlSeek(((THPSimpleControlWork*)&SimpleControl)->fileInfo, offset, 0);
-    nlRead(((THPSimpleControlWork*)&SimpleControl)->fileInfo, WorkBuffer, 0x20);
-    memcpy(&((THPSimpleControlWork*)&SimpleControl)->compInfo, WorkBuffer, sizeof(THPFrameCompInfo));
+    offset = SimpleControl.compInfoDataOffsets;
+    nlSeek(SimpleControl.fileInfo, offset, 0);
+    nlRead(SimpleControl.fileInfo, WorkBuffer, 0x20);
+    memcpy(&SimpleControl.compInfo, WorkBuffer, sizeof(THPFrameCompInfo));
 
     offset += sizeof(THPFrameCompInfo);
-    ((THPSimpleControlWork*)&SimpleControl)->audioExist = 0;
+    SimpleControl.audioExist = 0;
 
-    for (i = 0; i < ((THPSimpleControlWork*)&SimpleControl)->compInfo.mNumComponents; i++)
+    for (i = 0; i < SimpleControl.compInfo.mNumComponents; i++)
     {
-        switch (((THPSimpleControlWork*)&SimpleControl)->compInfo.mFrameComp[i])
+        switch (SimpleControl.compInfo.mFrameComp[i])
         {
         case 0:
-            nlSeek(((THPSimpleControlWork*)&SimpleControl)->fileInfo, offset, 0);
-            nlRead(((THPSimpleControlWork*)&SimpleControl)->fileInfo, WorkBuffer, 0x20);
-            memcpy(&((THPSimpleControlWork*)&SimpleControl)->videoInfo, WorkBuffer, sizeof(THPVideoInfo));
+            nlSeek(SimpleControl.fileInfo, offset, 0);
+            nlRead(SimpleControl.fileInfo, WorkBuffer, 0x20);
+            memcpy(&SimpleControl.videoInfo, WorkBuffer, sizeof(THPVideoInfo));
             offset += sizeof(THPVideoInfo);
             break;
         case 1:
-            nlSeek(((THPSimpleControlWork*)&SimpleControl)->fileInfo, offset, 0);
-            nlRead(((THPSimpleControlWork*)&SimpleControl)->fileInfo, WorkBuffer, 0x20);
-            memcpy(&((THPSimpleControlWork*)&SimpleControl)->audioInfo, WorkBuffer, sizeof(THPAudioInfo));
+            nlSeek(SimpleControl.fileInfo, offset, 0);
+            nlRead(SimpleControl.fileInfo, WorkBuffer, 0x20);
+            memcpy(&SimpleControl.audioInfo, WorkBuffer, sizeof(THPAudioInfo));
             offset += sizeof(THPAudioInfo);
-            ((THPSimpleControlWork*)&SimpleControl)->audioExist = 1;
+            SimpleControl.audioExist = 1;
             break;
         default:
             return 0;
         }
     }
 
-    ((THPSimpleControlWork*)&SimpleControl)->curOffset = ((THPSimpleControlWork*)&SimpleControl)->movieDataOffsets;
-    ((THPSimpleControlWork*)&SimpleControl)->readSize = ((THPSimpleControlWork*)&SimpleControl)->firstFrameSize;
-    ((THPSimpleControlWork*)&SimpleControl)->readIndex = 0;
-    ((THPSimpleControlWork*)&SimpleControl)->totalReadFrame = 0;
-    ((THPSimpleControlWork*)&SimpleControl)->dvdError = 0;
-    ((THPSimpleControlWork*)&SimpleControl)->textureSet.mFrameNumber = -1;
-    ((THPSimpleControlWork*)&SimpleControl)->nextDecodeIndex = 0;
-    ((THPSimpleControlWork*)&SimpleControl)->audioDecodeIndex = 0;
-    ((THPSimpleControlWork*)&SimpleControl)->audioOutputIndex = 0;
-    ((THPSimpleControlWork*)&SimpleControl)->preFetchState = 0;
-    ((THPSimpleControlWork*)&SimpleControl)->audioState = 0;
-    ((THPSimpleControlWork*)&SimpleControl)->loop = 0;
-    ((THPSimpleControlWork*)&SimpleControl)->open = 1;
-    ((THPSimpleControlWork*)&SimpleControl)->curVolume = 127.0f;
-    ((THPSimpleControlWork*)&SimpleControl)->targetVolume = 127.0f;
-    ((THPSimpleControlWork*)&SimpleControl)->rampCount = 0;
+    SimpleControl.curOffset = SimpleControl.movieDataOffsets;
+    SimpleControl.readSize = SimpleControl.firstFrameSize;
+    SimpleControl.readIndex = 0;
+    SimpleControl.totalReadFrame = 0;
+    SimpleControl.dvdError = 0;
+    SimpleControl.textureSet.mFrameNumber = -1;
+    SimpleControl.nextDecodeIndex = 0;
+    SimpleControl.audioDecodeIndex = 0;
+    SimpleControl.audioOutputIndex = 0;
+    SimpleControl.preFetchState = 0;
+    SimpleControl.audioState = 0;
+    SimpleControl.loop = 0;
+    SimpleControl.open = 1;
+    SimpleControl.curVolume = 127.0f;
+    SimpleControl.targetVolume = 127.0f;
+    SimpleControl.rampCount = 0;
 
     return 1;
 }
@@ -367,7 +325,7 @@ extern "C" int THPSimpleOpen(const char* fileName)
  */
 extern "C" int THPSimpleClose()
 {
-    THPSimpleControlWork* ctrl = (THPSimpleControlWork*)&SimpleControl;
+    THPSimpleControl* ctrl = &SimpleControl;
 
     if (ctrl->open && ctrl->preFetchState == 0)
     {
@@ -383,7 +341,7 @@ extern "C" int THPSimpleClose()
             ctrl->audioState = 0;
         }
 
-        THPSimpleControlWork* sc = (THPSimpleControlWork*)&SimpleControl;
+        THPSimpleControl* sc = &SimpleControl;
 
         if (sc->readProgress == 0)
         {
@@ -394,9 +352,9 @@ extern "C" int THPSimpleClose()
                 nlServiceFileSystem();
             }
 
-            nlClose(((THPSimpleControlWork*)&SimpleControl)->fileInfo);
+            nlClose(SimpleControl.fileInfo);
 
-            ((THPSimpleControlWork*)&SimpleControl)->fileInfo = NULL;
+            SimpleControl.fileInfo = NULL;
 
             return 1;
         }
@@ -414,7 +372,7 @@ extern "C" unsigned long THPSimpleCalcNeedMemory(int numReadBuffers, int numAudi
 
     NumReadBuffers = numReadBuffers;
 
-    THPSimpleControlWork* ctrl = (THPSimpleControlWork*)&SimpleControl;
+    THPSimpleControl* ctrl = &SimpleControl;
 
     NumAudioBuffers = numAudioBuffers;
 
@@ -537,8 +495,8 @@ static void __THPSimpleDVDCallback(nlFile* file, void* buffer, unsigned int byte
     }
 
     SimpleControl.readProgress = 1;
-    nlSeek(SimpleControl.file, SimpleControl.curOffset, 0);
-    nlReadAsync(SimpleControl.file, SimpleControl.readBuffer[SimpleControl.readIndex].mPtr, SimpleControl.readSize, __THPSimpleDVDCallback, 0);
+    nlSeek(SimpleControl.fileInfo, SimpleControl.curOffset, 0);
+    nlReadAsync(SimpleControl.fileInfo, SimpleControl.readBuffer[SimpleControl.readIndex].mPtr, SimpleControl.readSize, __THPSimpleDVDCallback, 0);
 }
 
 /**
@@ -559,8 +517,8 @@ extern "C" int THPSimplePreLoad(long loop)
 
         for (i = 0; i < readNum; i++)
         {
-            nlSeek(SimpleControl.file, SimpleControl.curOffset, 0);
-            nlRead(SimpleControl.file, SimpleControl.readBuffer[SimpleControl.readIndex].mPtr, SimpleControl.readSize);
+            nlSeek(SimpleControl.fileInfo, SimpleControl.curOffset, 0);
+            nlRead(SimpleControl.fileInfo, SimpleControl.readBuffer[SimpleControl.readIndex].mPtr, SimpleControl.readSize);
 
             long idx = SimpleControl.readIndex;
             SimpleControl.curOffset += SimpleControl.readSize;
@@ -595,7 +553,7 @@ extern "C" int THPSimplePreLoad(long loop)
  */
 extern "C" void THPSimpleAudioStart()
 {
-    ((THPSimpleControlWork*)&SimpleControl)->audioState = 1;
+    SimpleControl.audioState = 1;
 }
 
 /**
@@ -603,7 +561,7 @@ extern "C" void THPSimpleAudioStart()
  */
 extern "C" void THPSimpleAudioStop()
 {
-    ((THPSimpleControlWork*)&SimpleControl)->audioState = 0;
+    SimpleControl.audioState = 0;
 }
 
 /**
@@ -619,9 +577,9 @@ extern "C" int THPSimpleLoadStop()
 
         if (SimpleControl.readProgress != 0)
         {
-            nlCancelPendingAsyncReads(SimpleControl.file, __THPAsyncCancelCB);
+            nlCancelPendingAsyncReads(SimpleControl.fileInfo, __THPAsyncCancelCB);
 
-            while (nlAsyncReadsPending(SimpleControl.file))
+            while (nlAsyncReadsPending(SimpleControl.fileInfo))
             {
                 nlServiceFileSystem();
                 OSYieldThread();
@@ -662,13 +620,13 @@ extern "C" int THPSimpleLoadStop()
 static inline int VideoDecode(unsigned char* videoFrame)
 {
     long ret = THPVideoDecode(videoFrame,
-        ((THPSimpleControlWork*)&SimpleControl)->textureSet.mYTexture,
-        ((THPSimpleControlWork*)&SimpleControl)->textureSet.mUTexture,
-        ((THPSimpleControlWork*)&SimpleControl)->textureSet.mVTexture,
-        ((THPSimpleControlWork*)&SimpleControl)->thpWork);
+        SimpleControl.textureSet.mYTexture,
+        SimpleControl.textureSet.mUTexture,
+        SimpleControl.textureSet.mVTexture,
+        SimpleControl.thpWork);
     if (ret == 0)
     {
-        ((THPSimpleControlWork*)&SimpleControl)->textureSet.mFrameNumber = ((THPSimpleControlWork*)&SimpleControl)->readBuffer[((THPSimpleControlWork*)&SimpleControl)->nextDecodeIndex].mFrameNumber;
+        SimpleControl.textureSet.mFrameNumber = SimpleControl.readBuffer[SimpleControl.nextDecodeIndex].mFrameNumber;
         return 1;
     }
     return 0;
@@ -689,29 +647,29 @@ extern "C" long THPSimpleDecode(long audioTrack)
 
     do
     {
-        validBuffer = &((THPSimpleControlWork*)&SimpleControl)->readBuffer[0].mIsValid;
+        validBuffer = &SimpleControl.readBuffer[0].mIsValid;
 
-        if (validBuffer[((THPSimpleControlWork*)&SimpleControl)->nextDecodeIndex * 3] == 0)
+        if (validBuffer[SimpleControl.nextDecodeIndex * 3] == 0)
         {
             break;
         }
 
-        readBuffer = ((THPSimpleControlWork*)&SimpleControl)->readBuffer;
-        compSizePtr = (unsigned long*)(readBuffer[((THPSimpleControlWork*)&SimpleControl)->nextDecodeIndex].mPtr + 8);
-        ptr = readBuffer[((THPSimpleControlWork*)&SimpleControl)->nextDecodeIndex].mPtr + ((THPSimpleControlWork*)&SimpleControl)->compInfo.mNumComponents * 4 + 8;
+        readBuffer = SimpleControl.readBuffer;
+        compSizePtr = (unsigned long*)(readBuffer[SimpleControl.nextDecodeIndex].mPtr + 8);
+        ptr = readBuffer[SimpleControl.nextDecodeIndex].mPtr + SimpleControl.compInfo.mNumComponents * 4 + 8;
 
-        if (((THPSimpleControlWork*)&SimpleControl)->audioExist != 0 && AudioSystem != 1)
+        if (SimpleControl.audioExist != 0 && AudioSystem != 1)
         {
-            if (audioTrack < 0 || (unsigned long)audioTrack >= ((THPSimpleControlWork*)&SimpleControl)->audioInfo.mSndNumTracks)
+            if (audioTrack < 0 || (unsigned long)audioTrack >= SimpleControl.audioInfo.mSndNumTracks)
             {
                 return 4;
             }
 
-            if (((THPSimpleControlWork*)&SimpleControl)->audioBuffer[((THPSimpleControlWork*)&SimpleControl)->audioDecodeIndex].mValidSample == 0)
+            if (SimpleControl.audioBuffer[SimpleControl.audioDecodeIndex].mValidSample == 0)
             {
-                for (i = 0; i < ((THPSimpleControlWork*)&SimpleControl)->compInfo.mNumComponents; i++)
+                for (i = 0; i < SimpleControl.compInfo.mNumComponents; i++)
                 {
-                    switch (((THPSimpleControlWork*)&SimpleControl)->compInfo.mFrameComp[i])
+                    switch (SimpleControl.compInfo.mFrameComp[i])
                     {
                     case 0:
                         if (!VideoDecode(ptr))
@@ -721,16 +679,16 @@ extern "C" long THPSimpleDecode(long audioTrack)
                         break;
                     case 1:
                         sample = THPAudioDecode(
-                            ((THPSimpleControlWork*)&SimpleControl)->audioBuffer[((THPSimpleControlWork*)&SimpleControl)->audioDecodeIndex].mBuffer,
+                            SimpleControl.audioBuffer[SimpleControl.audioDecodeIndex].mBuffer,
                             ptr + *compSizePtr * audioTrack,
                             0);
                         old = OSDisableInterrupts();
-                        ((THPSimpleControlWork*)&SimpleControl)->audioBuffer[((THPSimpleControlWork*)&SimpleControl)->audioDecodeIndex].mValidSample = sample;
-                        ((THPSimpleControlWork*)&SimpleControl)->audioBuffer[((THPSimpleControlWork*)&SimpleControl)->audioDecodeIndex].mCurPtr = ((THPSimpleControlWork*)&SimpleControl)->audioBuffer[((THPSimpleControlWork*)&SimpleControl)->audioDecodeIndex].mBuffer;
+                        SimpleControl.audioBuffer[SimpleControl.audioDecodeIndex].mValidSample = sample;
+                        SimpleControl.audioBuffer[SimpleControl.audioDecodeIndex].mCurPtr = SimpleControl.audioBuffer[SimpleControl.audioDecodeIndex].mBuffer;
                         OSRestoreInterrupts(old);
-                        if (++((THPSimpleControlWork*)&SimpleControl)->audioDecodeIndex >= NumAudioBuffers)
+                        if (++SimpleControl.audioDecodeIndex >= NumAudioBuffers)
                         {
-                            ((THPSimpleControlWork*)&SimpleControl)->audioDecodeIndex = 0;
+                            SimpleControl.audioDecodeIndex = 0;
                         }
                         break;
                     }
@@ -745,9 +703,9 @@ extern "C" long THPSimpleDecode(long audioTrack)
         }
         else
         {
-            for (i = 0; i < ((THPSimpleControlWork*)&SimpleControl)->compInfo.mNumComponents; i++)
+            for (i = 0; i < SimpleControl.compInfo.mNumComponents; i++)
             {
-                switch (((THPSimpleControlWork*)&SimpleControl)->compInfo.mFrameComp[i])
+                switch (SimpleControl.compInfo.mFrameComp[i])
                 {
                 case 0:
                     if (!VideoDecode(ptr))
@@ -761,31 +719,31 @@ extern "C" long THPSimpleDecode(long audioTrack)
             }
         }
 
-        validBuffer[((THPSimpleControlWork*)&SimpleControl)->nextDecodeIndex * 3] = 0;
-        ((THPSimpleControlWork*)&SimpleControl)->nextDecodeIndex = (((THPSimpleControlWork*)&SimpleControl)->nextDecodeIndex + 1 >= NumReadBuffers) ? 0 : ((THPSimpleControlWork*)&SimpleControl)->nextDecodeIndex + 1;
+        validBuffer[SimpleControl.nextDecodeIndex * 3] = 0;
+        SimpleControl.nextDecodeIndex = (SimpleControl.nextDecodeIndex + 1 >= NumReadBuffers) ? 0 : SimpleControl.nextDecodeIndex + 1;
 
         old = OSDisableInterrupts();
 
         do
         {
-            if (validBuffer[((THPSimpleControlWork*)&SimpleControl)->readIndex * 3] == 0 && ((THPSimpleControlWork*)&SimpleControl)->readProgress == 0 && ((THPSimpleControlWork*)&SimpleControl)->dvdError == 0 && ((THPSimpleControlWork*)&SimpleControl)->preFetchState == 1)
+            if (validBuffer[SimpleControl.readIndex * 3] == 0 && SimpleControl.readProgress == 0 && SimpleControl.dvdError == 0 && SimpleControl.preFetchState == 1)
             {
-                if ((unsigned long)((THPSimpleControlWork*)&SimpleControl)->totalReadFrame > ((THPSimpleControlWork*)&SimpleControl)->numFrames - 1)
+                if ((unsigned long)SimpleControl.totalReadFrame > SimpleControl.numFrames - 1)
                 {
-                    if (((THPSimpleControlWork*)&SimpleControl)->loop != 1)
+                    if (SimpleControl.loop != 1)
                     {
                         break;
                     }
-                    ((THPSimpleControlWork*)&SimpleControl)->totalReadFrame = 0;
-                    ((THPSimpleControlWork*)&SimpleControl)->curOffset = ((THPSimpleControlWork*)&SimpleControl)->movieDataOffsets;
-                    ((THPSimpleControlWork*)&SimpleControl)->readSize = ((THPSimpleControlWork*)&SimpleControl)->firstFrameSize;
+                    SimpleControl.totalReadFrame = 0;
+                    SimpleControl.curOffset = SimpleControl.movieDataOffsets;
+                    SimpleControl.readSize = SimpleControl.firstFrameSize;
                 }
 
-                ((THPSimpleControlWork*)&SimpleControl)->readProgress = 1;
-                nlSeek(((THPSimpleControlWork*)&SimpleControl)->fileInfo, ((THPSimpleControlWork*)&SimpleControl)->curOffset, 0);
-                nlReadAsync(((THPSimpleControlWork*)&SimpleControl)->fileInfo,
-                    readBuffer[((THPSimpleControlWork*)&SimpleControl)->readIndex].mPtr,
-                    ((THPSimpleControlWork*)&SimpleControl)->readSize,
+                SimpleControl.readProgress = 1;
+                nlSeek(SimpleControl.fileInfo, SimpleControl.curOffset, 0);
+                nlReadAsync(SimpleControl.fileInfo,
+                    readBuffer[SimpleControl.readIndex].mPtr,
+                    SimpleControl.readSize,
                     __THPSimpleDVDCallback,
                     0);
             }
@@ -999,9 +957,9 @@ static void MixAudio(short* destination, short* source, unsigned long sample)
  */
 extern "C" int THPSimpleGetVideoInfo(THPVideoInfo* videoInfo)
 {
-    if (((THPSimpleControlWork*)&SimpleControl)->open)
+    if (SimpleControl.open)
     {
-        memcpy(videoInfo, &((THPSimpleControlWork*)&SimpleControl)->videoInfo, sizeof(THPVideoInfo));
+        memcpy(videoInfo, &SimpleControl.videoInfo, sizeof(THPVideoInfo));
         return 1;
     }
     return 0;
@@ -1012,7 +970,7 @@ extern "C" int THPSimpleGetVideoInfo(THPVideoInfo* videoInfo)
  */
 extern "C" s32 THPSimpleGetTotalFrame()
 {
-    if (((THPSimpleControlWork*)&SimpleControl)->open)
+    if (SimpleControl.open)
         return SimpleControl.numFrames;
     return 0;
 }
@@ -1068,7 +1026,7 @@ static void THPAudioMixCallback()
  */
 extern "C" int THPSimpleSetVolume(long vol, long time)
 {
-    THPSimpleControlWork* ctrl = (THPSimpleControlWork*)&SimpleControl;
+    THPSimpleControl* ctrl = &SimpleControl;
 
     if (ctrl->open && ctrl->audioExist)
     {
@@ -1087,7 +1045,7 @@ extern "C" int THPSimpleSetVolume(long vol, long time)
             time = 0;
 
         int old = OSDisableInterrupts();
-        ctrl = (THPSimpleControlWork*)&SimpleControl;
+        ctrl = &SimpleControl;
 
         ctrl->targetVolume = (float)vol;
 
@@ -1113,5 +1071,5 @@ extern "C" int THPSimpleSetVolume(long vol, long time)
  */
 extern "C" s32 THPSimpleGetCurrentFrame()
 {
-    return ((THPSimpleControlWork*)&SimpleControl)->textureSet.mFrameNumber;
+    return SimpleControl.textureSet.mFrameNumber;
 }

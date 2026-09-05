@@ -20,34 +20,17 @@ extern cBall* g_pBall;
 static bool sbDoDKBallStuckHack = true;
 static float sfBallStuckHackShoveMagnitude = 10.0f;
 
-#define SET_BIT(dest, src, shift, bit) \
-    asm { rlwimi dest, src, shift, bit, bit }
 /**
  * Offset/Address/Size: 0x10D0 | 0x801372E8 | size: 0xFC
  */
 PhysicsCharacter::PhysicsCharacter(float radius, float heightScale)
     : PhysicsCharacterBase(g_CollisionSpace, g_PhysicsWorld, radius + (heightScale / 2.0f))
+    // Bitfield mem-initializers: MWCC emits word-sized lwz/rlwimi/stw for these,
+    // whereas assignments in the body would use byte access (lbz/stb).
+    , m_CanCollideWithWall(true)
+    , m_CanCollideWithBall(true)
+    , m_CanCollidedWithGoalLine(true)
 {
-    register unsigned int flags;
-    register int one = 1;
-
-    unsigned int* flagsPtr = (unsigned int*)((char*)this + 0x80);
-
-    flags = *flagsPtr;
-    SET_BIT(flags, one, 31, 0);
-    *flagsPtr = flags;
-
-    flags = *flagsPtr;
-    SET_BIT(flags, one, 30, 1);
-    *flagsPtr = flags;
-
-    flags = *flagsPtr;
-    SET_BIT(flags, one, 28, 3);
-    *flagsPtr = flags;
-
-    // The three writes above set bits 0, 1 and 3 of the bitfield word at 0x80, i.e.
-    // m_CanCollideWithWall, m_CanCollideWithBall and m_CanCollidedWithGoalLine.
-
     m_nDKBallStuckHackCounter = 0;
     m_pAICharacter = NULL;
 

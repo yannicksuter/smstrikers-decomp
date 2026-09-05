@@ -99,80 +99,8 @@ bool PlatAudio::IsStreamingInited()
  */
 void PlatAudio::StopAllStreams()
 {
-    using namespace GCAudioStreaming;
-    typedef nlSortedSlot<AudioStream*, 7>::EntryLookup<AudioStream*> EL;
-
-    AudioStream* stream;
-    AudioStreamBuffer* buffer;
-    int streamOffset;
-    unsigned long streamIndex;
-    unsigned long zero = 0;
-
-    for (streamIndex = 0, streamOffset = 0; streamIndex < g_Streams.m_EntryCount; streamOffset += 8, streamIndex++)
+    for (unsigned long stream = 0; stream < g_Streams.m_EntryCount; stream++)
     {
-        stream = *((EL*)((char*)g_Streams.m_pEntryLookup + streamOffset))->pEntry;
-        stream->m_Flags &= ~(1 << SF_Play);
-        if (stream->m_State == SS_Playing)
-        {
-            volatile unsigned long j = (unsigned long)(buffer = NULL);
-            if (zero < stream->m_BufferCount)
-                buffer = stream->m_Buffers[0];
-
-            while (buffer != NULL)
-            {
-                buffer->m_Volume = 0;
-                sndStreamMixParameterEx(buffer->m_StreamId, buffer->m_Volume, buffer->m_Pan, buffer->m_SurroundPan, 0, 0);
-                sndStreamDeactivate(buffer->m_StreamId);
-
-                stream->m_State = SS_Warm;
-                {
-                    unsigned long next = j + 1;
-                    j = next;
-                    if (next < stream->m_BufferCount)
-                        buffer = stream->m_Buffers[next];
-                    else
-                        buffer = NULL;
-                }
-            }
-
-            stream->m_StreamPos = 0;
-            stream->m_State = SS_Warm;
-        }
-
-        stream->CancelPendingReads();
-        if (stream->m_Flags & (1 << SF_CoolOnStop))
-        {
-            stream->m_Flags &= ~(1 << SF_CoolOnStop);
-            if (stream->m_State > SS_Initd)
-            {
-                unsigned long flags = stream->m_Flags;
-                flags &= ~(1 << SF_SeriousStop);
-                flags |= (1 << SF_SeriousStop);
-                stream->m_Flags = flags;
-
-                volatile unsigned long k = 0;
-                buffer = NULL;
-                if (zero < stream->m_BufferCount)
-                    buffer = stream->m_Buffers[0];
-
-                while (buffer != NULL)
-                {
-                    stream->m_BuffMgr.FreeBuffer(buffer);
-
-                    {
-                        unsigned long idx = k;
-                        stream->m_Buffers[idx] = NULL;
-                        idx = idx + 1;
-                        k = idx;
-                        if (idx < stream->m_BufferCount)
-                            buffer = stream->m_Buffers[idx];
-                        else
-                            buffer = NULL;
-                    }
-                }
-
-                stream->m_State = SS_Initd;
-            }
-        }
+        (*g_Streams.m_pEntryLookup[stream].pEntry)->Stop();
     }
 }

@@ -103,10 +103,10 @@ static inline void glx_SetFogNone()
 void glplatViewProjectPoint(eGLView view, const nlVector3& v3world, nlVector3& v3NDC)
 {
     nlVector3 v_out;
-    nlMatrix4* temp_r31 = glViewGetViewMatrix(view);
-    nlMatrix4* temp_r30 = glViewGetProjectionMatrix(view);
-    nlMultPosVectorMatrix(v_out, v3world, *temp_r31);
-    nlMultPosVectorMatrix(v3NDC, v_out, *temp_r30);
+    nlMatrix4* pView = glViewGetViewMatrix(view);
+    nlMatrix4* pProj = glViewGetProjectionMatrix(view);
+    nlMultPosVectorMatrix(v_out, v3world, *pView);
+    nlMultPosVectorMatrix(v3NDC, v_out, *pProj);
     float wc = 1.f / -v_out.z;
     v3NDC.x = v3NDC.x * wc;
     v3NDC.y = -v3NDC.y * wc;
@@ -530,14 +530,14 @@ void virt_cb(unsigned long faultAddr, unsigned long mainAddr, unsigned long page
 
 static inline void ClearXFBInline(void* cache)
 {
-    s32 var_r6 = 0;
-    u8* var_r5 = (u8*)cache;
+    s32 offset = 0;
+    u8* p = (u8*)cache;
 
-    while (var_r6 < (s32)glx_FBSize)
+    while (offset < (s32)glx_FBSize)
     {
-        *(u32*)var_r5 = 0x10801080;
-        var_r6 += 4;
-        var_r5 += 4;
+        *(u32*)p = 0x10801080;
+        offset += 4;
+        p += 4;
     }
     DCFlushRange(cache, glx_FBSize);
 }
@@ -563,8 +563,8 @@ bool glplatStartup(gl_ScreenInfo* screenInfo)
 
     if (Config::Global().Exists("gpu fifo"))
     {
-        f32 var_f1 = GetConfigFloat(Config::Global(), "gpu fifo", 0.0f);
-        glx_FIFOSize = (u32)(1024.0f * (1024.0f * var_f1));
+        f32 fifoMegabytes = GetConfigFloat(Config::Global(), "gpu fifo", 0.0f);
+        glx_FIFOSize = (u32)(1024.0f * (1024.0f * fifoMegabytes));
     }
 
     screenInfo->ScreenWidth = 640;
@@ -826,14 +826,14 @@ void virt_cb(unsigned long faultAddr, unsigned long mainAddr, unsigned long page
  */
 void glx_ClearXFB(void* cache)
 {
-    u8* var_r5 = (u8*)cache;
-    s32 var_r6 = 0;
+    u8* p = (u8*)cache;
+    s32 offset = 0;
 
-    while (var_r6 < (s32)glx_FBSize)
+    while (offset < (s32)glx_FBSize)
     {
-        *(u32*)var_r5 = 0x10801080;
-        var_r6 += 4;
-        var_r5 += 4;
+        *(u32*)p = 0x10801080;
+        offset += 4;
+        p += 4;
     }
     DCFlushRange(cache, glx_FBSize);
 }

@@ -684,9 +684,9 @@ void PhysicsObject::GetPosition(nlVector3* position) const
  */
 void PhysicsObject::SetPosition(const nlVector3& pos, PhysicsObject::CoordinateType type)
 {
-    nlMatrix4 rot;     // sp54
-    nlMatrix4 inv_rot; // sp14
-    nlVector3 _pos;    // sp8...sp10
+    nlMatrix4 rot;
+    nlMatrix4 inv_rot;
+    nlVector3 _pos;
 
     if ((m_parentObject != NULL) && (type == 0))
     {

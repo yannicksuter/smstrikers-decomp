@@ -10,18 +10,7 @@ void FETweenManager::startTween(FETweener* pTweener)
 
     pTweener->m_tweenActive = 1;
 
-    // Ensure we have slots available in the active tween list
-    if (((SlotPoolBase*)&m_activeTweenList)->m_FreeList == NULL)
-    {
-        SlotPoolBase::BaseAddNewBlock((SlotPoolBase*)&m_activeTweenList, sizeof(DLListEntry<FETweener*>));
-    }
-
-    // Get a free entry from the pool
-    if (((SlotPoolBase*)&m_activeTweenList)->m_FreeList != NULL)
-    {
-        pEntry = (DLListEntry<FETweener*>*)((SlotPoolBase*)&m_activeTweenList)->m_FreeList;
-        ((SlotPoolBase*)&m_activeTweenList)->m_FreeList = ((SlotPoolBase*)&m_activeTweenList)->m_FreeList->next;
-    }
+    m_activeTweenList.m_Allocator.Allocate(pEntry);
 
     // Initialize the entry
     if (pEntry != NULL)
@@ -211,15 +200,7 @@ void FETweenManager::Update(float fDeltaT)
                 nextTween->m_tweenActive = 1;
 
                 pEntry = NULL;
-                if (((SlotPoolBase*)&m_activeTweenList)->m_FreeList == NULL)
-                {
-                    SlotPoolBase::BaseAddNewBlock((SlotPoolBase*)&m_activeTweenList, sizeof(DLListEntry<FETweener*>));
-                }
-                if (((SlotPoolBase*)&m_activeTweenList)->m_FreeList != NULL)
-                {
-                    pEntry = (DLListEntry<FETweener*>*)((SlotPoolBase*)&m_activeTweenList)->m_FreeList;
-                    ((SlotPoolBase*)&m_activeTweenList)->m_FreeList = ((SlotPoolBase*)&m_activeTweenList)->m_FreeList->next;
-                }
+                m_activeTweenList.m_Allocator.Allocate(pEntry);
                 if (pEntry != NULL)
                 {
                     pEntry->m_next = NULL;
@@ -250,8 +231,7 @@ void FETweenManager::Update(float fDeltaT)
 
             // Remove from active list and return to free pool
             nlDLRingRemove(activeListHead, savedEntry);
-            pEntry->m_next = (DLListEntry<FETweener*>*)((SlotPoolBase*)&m_activeTweenList)->m_FreeList;
-            ((SlotPoolBase*)&m_activeTweenList)->m_FreeList = (SlotPoolEntry*)pEntry;
+            m_activeTweenList.m_Allocator.Free(pEntry);
 
             // Find and remove from tween list
             tweenEntry = nlDLRingGetStart(m_tweenList.m_Head);
@@ -274,8 +254,7 @@ void FETweenManager::Update(float fDeltaT)
                     }
 
                     nlDLRingRemove(&m_tweenList.m_Head, savedEntry);
-                    pEntry->m_next = (DLListEntry<FETweener*>*)((SlotPoolBase*)&m_tweenList)->m_FreeList;
-                    ((SlotPoolBase*)&m_tweenList)->m_FreeList = (SlotPoolEntry*)pEntry;
+                    m_tweenList.m_Allocator.Free(pEntry);
                 }
                 else
                 {
@@ -361,16 +340,7 @@ FETweener* FETweenManager::createTween(float* startVals, float* endVals, float d
 
     DLListEntry<FETweener*>* pEntry = NULL;
 
-    if (((SlotPoolBase*)&m_tweenList)->m_FreeList == NULL)
-    {
-        SlotPoolBase::BaseAddNewBlock((SlotPoolBase*)&m_tweenList, sizeof(DLListEntry<FETweener*>));
-    }
-
-    if (((SlotPoolBase*)&m_tweenList)->m_FreeList != NULL)
-    {
-        pEntry = (DLListEntry<FETweener*>*)((SlotPoolBase*)&m_tweenList)->m_FreeList;
-        ((SlotPoolBase*)&m_tweenList)->m_FreeList = ((SlotPoolBase*)&m_tweenList)->m_FreeList->next;
-    }
+    m_tweenList.m_Allocator.Allocate(pEntry);
 
     if (pEntry != NULL)
     {

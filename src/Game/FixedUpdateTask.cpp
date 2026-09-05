@@ -142,16 +142,10 @@ void FixedUpdateTask::CallFixedUpdateTasks()
     {
         bool i = true;
         float goalieX = (float)fabs(g_pTeams[0]->GetGoalie()->m_v3Position.x);
-        if (goalieX > cField::GetGoalLineX(1U))
-        {
-        }
-        else
+        if (!(goalieX > cField::GetGoalLineX(1U)))
         {
             goalieX = (float)fabs(g_pTeams[1]->GetGoalie()->m_v3Position.x);
-            if (goalieX > cField::GetGoalLineX(1U))
-            {
-            }
-            else
+            if (!(goalieX > cField::GetGoalLineX(1U)))
             {
                 i = false;
             }

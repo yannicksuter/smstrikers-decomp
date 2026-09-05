@@ -198,17 +198,17 @@ void Jumbotron::BeginLoad()
     }
 
     m_State = JState_Loading;
-    const char* var_r4 = NULL;
+    const char* pPrefix = NULL;
     m_fTime = 0.0f;
     if (g_e3_Build != 0)
     {
         if (m_AnimationClass == Jumbo_Kickoff)
         {
-            var_r4 = "kickoff";
+            pPrefix = "kickoff";
         }
         else
         {
-            var_r4 = "goal";
+            pPrefix = "goal";
         }
     }
     else
@@ -216,19 +216,19 @@ void Jumbotron::BeginLoad()
         switch (m_AnimationClass)
         {
         case Jumbo_Kickoff:
-            var_r4 = "kickoff";
+            pPrefix = "kickoff";
             break;
         case Jumbo_Goal:
-            var_r4 = "goal";
+            pPrefix = "goal";
             break;
         case Jumbo_Wins:
-            var_r4 = "wins";
+            pPrefix = "wins";
             break;
         }
     }
 
     char szTextureBundle[0x80];
-    nlStrNCpy<char>(m_szPrefix, var_r4, 0x40);
+    nlStrNCpy<char>(m_szPrefix, pPrefix, 0x40);
     nlSNPrintf(szTextureBundle, 0x80, "jumbotron/%s.glt", m_szPrefix);
     glBeginLoadTextureBundle(szTextureBundle, BundleLoad_cb, m_BundleLoadBase);
 }
